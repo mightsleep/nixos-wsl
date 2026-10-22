@@ -8,6 +8,7 @@
       pkgs.net-snmp # snmpwalk on switches and printers
       pkgs.tio # serial console, USB adapter attached through usbipd
       pkgs.sqlcmd
+      pkgs.certipy # read-only AD CS config audit: `certipy-ad find`
     ];
 
     # USB serial adapters show up as root:dialout
