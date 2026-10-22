@@ -51,6 +51,95 @@
           }
         '';
 
+        # Bold keywords and types, italic strings, comments and parameters;
+        # in Rust types go blue, functions green, lifetimes and self teal.
+        # On ColorScheme, so it survives a :colorscheme reload.
+        luaConfigRC.highlights = ''
+          local c = require("catppuccin.palettes").get_palette("mocha")
+          local set = vim.api.nvim_set_hl
+
+          local function add_style(group, style)
+            local hl = vim.api.nvim_get_hl(0, { name = group, link = false })
+            set(0, group, vim.tbl_extend("force", hl, style))
+          end
+
+          local function apply()
+            set(0, "LineNr", { fg = c.overlay0 })
+            set(0, "CursorLineNr", { fg = c.green, bold = true })
+
+            for _, g in ipairs({
+              "@keyword", "@keyword.return", "@keyword.function", "@conditional", "@repeat",
+              "@type", "@type.builtin", "@boolean", "@constant", "@constant.builtin",
+            }) do
+              add_style(g, { bold = true })
+            end
+            for _, g in ipairs({
+              "@string", "@parameter", "@variable.parameter", "@tag.attribute", "Comment", "@comment",
+            }) do
+              add_style(g, { italic = true })
+            end
+            for _, g in ipairs({
+              "@function", "@function.call", "@method", "@method.call", "@keyword.import", "@include",
+            }) do
+              add_style(g, { bold = true, italic = true })
+            end
+
+            set(0, "RainbowDelimiterRed", { fg = c.red })
+            set(0, "RainbowDelimiterYellow", { fg = c.yellow })
+            set(0, "RainbowDelimiterBlue", { fg = c.blue })
+            set(0, "RainbowDelimiterOrange", { fg = c.peach })
+            set(0, "RainbowDelimiterGreen", { fg = c.green })
+            set(0, "RainbowDelimiterViolet", { fg = c.mauve })
+            set(0, "RainbowDelimiterCyan", { fg = c.teal })
+
+            set(0, "SnacksIndent", { fg = c.surface1 })
+            set(0, "SnacksIndentScope", { fg = c.blue })
+            set(0, "TreesitterContextSeparator", { fg = c.surface1 })
+            set(0, "TreesitterContextBottom", { underline = true, sp = c.surface1 })
+          end
+
+          local rust = vim.api.nvim_create_namespace("rust_hl")
+          local function rust_hl(group, fg, style)
+            set(rust, group, vim.tbl_extend("force", { fg = fg }, style or {}))
+          end
+          for _, g in ipairs({
+            "@type", "@type.builtin", "@lsp.type.struct", "@lsp.type.enum",
+            "@lsp.type.trait", "@lsp.type.typeAlias", "@lsp.type.interface",
+          }) do
+            rust_hl(g, c.blue, { bold = true })
+          end
+          rust_hl("@lsp.type.typeParameter", c.blue, { italic = true })
+          rust_hl("@module", c.blue)
+          rust_hl("@lsp.type.namespace", c.blue)
+          for _, g in ipairs({
+            "@function", "@function.call", "@method", "@method.call",
+            "@lsp.type.function", "@lsp.type.method",
+          }) do
+            rust_hl(g, c.green, { bold = true, italic = true })
+          end
+          rust_hl("@string", c.yellow, { italic = true })
+          rust_hl("@operator", c.yellow)
+          rust_hl("@lsp.type.decorator", c.peach)
+          rust_hl("@function.macro", c.peach)
+          rust_hl("@lsp.type.macro", c.peach)
+          rust_hl("@lsp.type.parameter", c.peach, { italic = true })
+          for _, g in ipairs({
+            "@lsp.type.lifetime", "@storageclass.lifetime", "@label", "@variable.builtin",
+            "@lsp.type.selfKeyword", "@lsp.type.selfTypeKeyword",
+          }) do
+            rust_hl(g, c.teal, { italic = true })
+          end
+          rust_hl("@character", c.teal)
+          rust_hl("@constant.builtin", c.teal, { bold = true })
+
+          vim.api.nvim_create_autocmd("FileType", {
+            pattern = "rust",
+            callback = function() vim.api.nvim_win_set_hl_ns(0, rust) end,
+          })
+          vim.api.nvim_create_autocmd("ColorScheme", { callback = apply })
+          apply()
+        '';
+
         theme = {
           enable = true;
           name = "catppuccin";
