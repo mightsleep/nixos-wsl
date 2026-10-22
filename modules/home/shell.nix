@@ -4,10 +4,8 @@
     home = {
       sessionVariables.EDITOR = "nvim";
       packages = [
-        pkgs.btop
         pkgs.ripgrep
         pkgs.fd
-        pkgs.eza
         pkgs.jq
         pkgs.tldr
         pkgs.dust
@@ -37,6 +35,14 @@
       };
 
       bat.enable = true;
+      # As programs, not packages: only then catppuccin themes them
+      btop.enable = true;
+      eza = {
+        enable = true;
+        # Aliases are ours (above), with --icons
+        enableFishIntegration = false;
+        enableNushellIntegration = false;
+      };
       fzf.enable = true;
       lazygit.enable = true;
 

@@ -22,6 +22,56 @@
         settings = {
           user.name = "mightsleep";
 
+          # Catppuccin mocha in truecolor: the terminal's ANSI magenta is pink in mocha
+          colors = {
+            "change_id prefix" = {
+              fg = "#89b4fa";
+              bold = true;
+            };
+            "change_id rest" = "#6c7086";
+            "working_copy change_id prefix" = {
+              fg = "#89b4fa";
+              bold = true;
+            };
+            "working_copy change_id rest" = "#6c7086";
+            "commit_id" = "#6c7086";
+            "working_copy commit_id" = "#9399b2";
+            "description" = "#cdd6f4";
+            "working_copy description" = "#cdd6f4";
+            "working_copy empty description placeholder" = "#a6adc8";
+            "bookmarks" = {
+              fg = "#a6e3a1";
+              bold = true;
+            };
+            "working_copy bookmarks" = {
+              fg = "#a6e3a1";
+              bold = true;
+            };
+            "tags" = "#94e2d5";
+            "timestamp" = "#74c7ec";
+            "email" = "#a6e3a1";
+            "working_copy email" = "#a6e3a1";
+            "empty" = {
+              fg = "#f9e2af";
+              bold = true;
+            };
+            "conflict" = {
+              fg = "#f38ba8";
+              bold = true;
+            };
+            "diff added" = "#a6e3a1";
+            "diff removed" = "#f38ba8";
+            "diff modified" = "#f9e2af";
+            "diff file_header" = {
+              fg = "#89b4fa";
+              bold = true;
+            };
+            "node working_copy" = {
+              fg = "#cba6f7";
+              bold = true;
+            };
+          };
+
           ui = {
             default-command = "log";
             diff-editor = ":builtin";

@@ -11,7 +11,7 @@
       runtimeInputs = [pkgs.jujutsu pkgs.git];
       text = ''
         if jj root --ignore-working-copy >/dev/null 2>&1; then
-          printf '\e[1;35m\U000f15c6\e[0m '
+          printf '\e[1;38;2;203;166;247m\U000f15c6\e[0m '
           exec jj log --ignore-working-copy --no-graph --color always -r @ -T '
             separate(" ",
               change_id.shortest(4),
@@ -22,7 +22,7 @@
         fi
         branch=$(git branch --show-current 2>/dev/null) || exit 0
         [ -n "$branch" ] || branch=$(git rev-parse --short HEAD 2>/dev/null) || exit 0
-        printf '\e[1;35m %s\e[0m' "$branch"
+        printf '\e[1;38;2;203;166;247m %s\e[0m' "$branch"
       '';
     };
   in {
