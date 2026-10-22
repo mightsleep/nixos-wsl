@@ -55,6 +55,8 @@
           enable = true;
           name = "catppuccin";
           style = "mocha";
+          # Background comes from Windows Terminal (acrylic, image)
+          transparent = true;
         };
 
         lsp = {
@@ -133,7 +135,7 @@
         };
         statusline.lualine = {
           enable = true;
-          setupOpts.options.theme = "catppuccin";
+          setupOpts.options.theme = "catppuccin-nvim";
         };
         telescope.enable = true;
         filetree.neo-tree.enable = true;
@@ -151,6 +153,49 @@
             setupOpts = {
               bigfile.enabled = true;
               indent.enabled = true;
+              # Default NEOVIM header; no `startup` section, it counts lazy.nvim plugins
+              dashboard = {
+                enabled = true;
+                preset.keys = [
+                  {
+                    icon = " ";
+                    key = "f";
+                    desc = "Find file";
+                    action = ":Telescope find_files";
+                  }
+                  {
+                    icon = " ";
+                    key = "r";
+                    desc = "Recent files";
+                    action = ":Telescope oldfiles";
+                  }
+                  {
+                    icon = " ";
+                    key = "g";
+                    desc = "Grep";
+                    action = ":Telescope live_grep";
+                  }
+                  {
+                    icon = " ";
+                    key = "n";
+                    desc = "New file";
+                    action = ":ene | startinsert";
+                  }
+                  {
+                    icon = " ";
+                    key = "q";
+                    desc = "Quit";
+                    action = ":qa";
+                  }
+                ];
+                sections = [
+                  {section = "header";}
+                  {
+                    section = "keys";
+                    gap = 1;
+                  }
+                ];
+              };
             };
           };
         };
