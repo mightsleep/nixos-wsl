@@ -1,6 +1,7 @@
-# Prompt in the style of nushell's default: green path, `> `, time on the right.
-# Nu keeps its own prompt and only gets the VCS segment appended, fish copies the look.
-# The segment is one script for both shells: jj first, plain git as a fallback.
+# Two-line prompt, the laptop's starship layout as plain text with Nerd Font glyphs:
+#    user  󰉋 ~/path  󱗆 jj
+#   ❯
+# The VCS segment is one script for fish and nu: jj first, plain git as a fallback.
 {
   flake.modules.homeManager.prompt = {pkgs, ...}: let
     # --ignore-working-copy: no snapshot on every prompt, so it stays fast in big
@@ -10,6 +11,7 @@
       runtimeInputs = [pkgs.jujutsu pkgs.git];
       text = ''
         if jj root --ignore-working-copy >/dev/null 2>&1; then
+          printf '\e[1;35m\U000f15c6\e[0m '
           exec jj log --ignore-working-copy --no-graph --color always -r @ -T '
             separate(" ",
               change_id.shortest(4),
@@ -20,7 +22,7 @@
         fi
         branch=$(git branch --show-current 2>/dev/null) || exit 0
         [ -n "$branch" ] || branch=$(git rev-parse --short HEAD 2>/dev/null) || exit 0
-        printf '\e[35m%s\e[0m' "$branch"
+        printf '\e[1;35m %s\e[0m' "$branch"
       '';
     };
   in {
@@ -28,35 +30,45 @@
 
     programs.fish.functions = {
       fish_prompt = ''
-        set -l path (set_color green --bold)
-        set -l sep (set_color brgreen --bold)
-        if fish_is_root_user
-          set path (set_color red --bold)
-          set sep (set_color brred --bold)
-        end
-        set -l dir (string replace -r "^$HOME" "~" -- $PWD)
-        echo -n $path(string replace -a / "$sep/$path" -- $dir)(set_color normal)
+        set -l code $status
+        set -l user_color blue
+        fish_is_root_user; and set user_color red
+
+        echo -n -s (set_color $user_color --bold)  " " $USER "  " \
+          (set_color green --bold) \U000f024b " " (prompt_pwd -d 0) (set_color normal)
         set -l vcs (vcs-prompt)
-        test -n "$vcs"; and echo -n " $vcs"
-        echo -n "> "
+        test -n "$vcs"; and echo -n "  $vcs"
+        echo
+
+        set -l char_color green
+        test $code -ne 0; and set char_color red
+        echo -n -s (set_color $char_color --bold) "❯ " (set_color normal)
       '';
+      # Only a non-zero exit code, no clock
       fish_right_prompt = ''
         set -l code $status
-        test $code -ne 0; and echo -n (set_color red --bold)$code" "
-        set -l now (date '+%x %X')
-        echo -n (set_color magenta)(string replace -ra '([/:.])' (set_color green)'$1'(set_color magenta) -- $now)(set_color normal)
+        test $code -ne 0; and echo -n (set_color red --bold)$code(set_color normal)
       '';
       # Vi mode etc. would draw [I] in front of the prompt
       fish_mode_prompt = "";
     };
 
+    # Same layout for nu. Each prompt closure has its own scope, so the
+    # vcs-prompt call does not touch LAST_EXIT_CODE for the indicator.
     programs.nushell.extraConfig = ''
-      # Default prompt + VCS segment. A closure scope: the jj call
-      # does not touch LAST_EXIT_CODE for the right prompt.
-      let default_prompt = $env.PROMPT_COMMAND
       $env.PROMPT_COMMAND = {||
-        let vcs = (^vcs-prompt)
-        if ($vcs | is-empty) { do $default_prompt } else { $"(do $default_prompt) ($vcs)" }
+        let user_color = if (is-admin) { "red_bold" } else { "blue_bold" }
+        let dir = $env.PWD | str replace $nu.home-dir "~"
+        let vcs = ^vcs-prompt
+        let line = $"(ansi $user_color)(char -u f313) ($env.USER)  (ansi green_bold)(char -u f024b) ($dir)(ansi reset)"
+        if ($vcs | is-empty) { $line + "\n" } else { $"($line)  ($vcs)\n" }
+      }
+      $env.PROMPT_COMMAND_RIGHT = {||
+        let code = $env.LAST_EXIT_CODE? | default 0
+        if $code != 0 { $"(ansi red_bold)($code)(ansi reset)" } else { "" }
+      }
+      $env.PROMPT_INDICATOR = {||
+        if ($env.LAST_EXIT_CODE? | default 0) == 0 { $"(ansi green_bold)❯ (ansi reset)" } else { $"(ansi red_bold)❯ (ansi reset)" }
       }
     '';
   };
